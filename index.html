@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iron Throne — PS5 Controller Stand | 3D Model</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08070a;
+      --bg2: #0f0e14;
+      --accent: #8b1a1a;
+      --accent2: #c41e3a;
+      --gold: #c9a84c;
+      --steel: #a8b0b8;
+      --text: #e8e4df;
+      --muted: #8a8580;
+      --card: #15131a;
+      --border: rgba(139, 26, 26, 0.3);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    #dragon-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.28;
+    }
+
+    #scroll-progress {
+      position: fixed; top: 0; left: 0; height: 3px; z-index: 200;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      width: 0%;
+      box-shadow: 0 0 12px rgba(139,26,26,0.5);
+    }
+
+    .float-cta {
+      position: fixed; bottom: 1.8rem; right: 1.8rem; z-index: 90;
+      background: var(--accent); color: #fff;
+      padding: 0.85rem 1.5rem; border-radius: 999px;
+      font-weight: 600; font-size: 0.9rem; text-decoration: none;
+      box-shadow: 0 8px 30px rgba(139,26,26,0.45);
+      display: flex; align-items: center; gap: 0.5rem;
+      transform: translateY(100px); opacity: 0;
+      transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+    }
+    .float-cta.show { transform: translateY(0); opacity: 1; }
+    .float-cta:hover {
+      background: #6e1515;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(139,26,26,0.6);
+    }
+
+    #loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity 0.8s ease, visibility 0.8s;
+    }
+    #loader.hide { opacity: 0; visibility: hidden; }
+    .loader-orb {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      animation: bounce 1.2s ease-in-out infinite;
+      box-shadow: 0 0 40px rgba(139,26,26,0.5);
+    }
+    .loader-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 2rem; margin-top: 1.5rem;
+      color: var(--gold);
+    }
+    .loader-tagline {
+      color: var(--muted); font-size: 0.8rem;
+      margin-top: 0.4rem; letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .loader-bar-wrap {
+      width: 180px; height: 3px; background: #1f1c24;
+      margin-top: 2rem; border-radius: 2px; overflow: hidden;
+    }
+    .loader-bar {
+      height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--gold));
+      transition: width 0.3s;
+    }
+    .loader-pct { margin-top: 0.6rem; font-size: 0.75rem; color: var(--muted); }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 3rem;
+      background: linear-gradient(to bottom, rgba(8,7,10,0.95), transparent);
+      transition: background 0.3s;
+    }
+    nav.scrolled { background: rgba(8,7,10,0.92); backdrop-filter: blur(12px); }
+    .logo {
+      font-family: 'Cinzel', serif;
+      font-size: 1.35rem; color: var(--gold); text-decoration: none;
+    }
+    .nav-r { display: flex; gap: 2rem; align-items: center; }
+    .nav-r a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-r a:hover { color: var(--accent2); }
+    .nav-book {
+      background: var(--accent); color: #fff !important;
+      padding: 0.5rem 1.3rem; border-radius: 999px;
+      font-weight: 600; font-size: 0.85rem !important;
+    }
+    .nav-book:hover { background: #6e1515; color: #fff !important; }
+
+    main, section, footer, nav, .float-cta, #loader, #lightbox {
+      position: relative;
+      z-index: 1;
+    }
+
+    #hero {
+      min-height: 100vh; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: -8% 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(139,26,26,0.18) 0%, transparent 60%),
+                  linear-gradient(180deg, #08070a 0%, #14101a 50%, #08070a 100%);
+      z-index: -1;
+    }
+    .hero-content {
+      text-align: center;
+      max-width: 820px;
+      padding: 2rem;
+    }
+    .hero-tag {
+      font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1rem;
+    }
+    .hero-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2.6rem, 6.5vw, 4.2rem);
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em { color: var(--accent2); font-style: normal; }
+    .hero-sub {
+      color: var(--muted); font-size: 1.1rem; max-width: 540px; margin: 0 auto 2rem;
+    }
+    .h-cta-row {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    }
+    .btn-fill {
+      background: var(--accent); color: #fff;
+      padding: 0.9rem 1.8rem; border-radius: 999px;
+      font-weight: 600; text-decoration: none;
+      transition: all 0.25s;
+      box-shadow: 0 6px 24px rgba(139,26,26,0.4);
+    }
+    .btn-fill:hover { background: #6e1515; transform: translateY(-2px); }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      padding: 0.9rem 1.8rem; border-radius: 999px;
+      font-weight: 500; text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.25s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+    section { padding: 5rem 1.5rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .tag-line {
+      font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.8rem;
+    }
+    .big-serif {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15; margin-bottom: 2.5rem;
+    }
+    .big-serif em { color: var(--accent2); font-style: normal; }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .step-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(139,26,26,0.25);
+    }
+    .step-card img {
+      width: 100%; height: 180px; object-fit: cover;
+      background: #1f1c24;
+    }
+    .step-card .step-body { padding: 1.2rem 1.3rem; }
+    .step-num {
+      font-size: 0.7rem; letter-spacing: 0.15em; color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+    .step-card h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+    .step-card p { font-size: 0.85rem; color: var(--muted); }
+
+    .carousel-section { background: var(--bg2); }
+    #carousel-wrap {
+      position: relative;
+      width: 100%; height: 420px;
+      perspective: 1000px;
+      margin: 2rem auto;
+      overflow: hidden;
+    }
+    #drag-container {
+      position: absolute;
+      width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateX(-10deg);
+    }
+    #spin-container {
+      position: absolute;
+      width: 135px; height: 175px;
+      left: 50%; top: 50%;
+      margin-left: -67px; margin-top: -87px;
+      transform-style: preserve-3d;
+    }
+    #spin-container img {
+      position: absolute;
+      width: 135px; height: 175px;
+      left: 0; top: 0;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+      border: 2px solid rgba(201,168,76,0.25);
+      cursor: pointer;
+      transition: box-shadow 0.3s;
+    }
+    #spin-container img:hover {
+      box-shadow: 0 0 20px rgba(139,26,26,0.65);
+    }
+    #ground {
+      position: absolute;
+      width: 690px; height: 690px;
+      left: 50%; top: 50%;
+      margin-left: -345px; margin-top: -345px;
+      transform: rotateX(90deg) translateZ(-180px);
+      background: radial-gradient(ellipse, rgba(139,26,26,0.15) 0%, transparent 70%);
+    }
+    .carousel-hint {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.3rem;
+    }
+    .tip-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+    .tip-card h3 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+      font-size: 1.1rem;
+    }
+    .tip-card p { font-size: 0.9rem; color: var(--muted); }
+
+    .gift-section {
+      background: linear-gradient(180deg, var(--bg2) 0%, #120f18 100%);
+      text-align: center;
+    }
+    .gift-box {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .gift-box::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 50%);
+      animation: giftGlow 8s ease-in-out infinite;
+    }
+    @keyframes giftGlow {
+      0%, 100% { transform: translate(0,0); }
+      50% { transform: translate(10%, 10%); }
+    }
+    .gift-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .gift-box h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+      color: var(--gold);
+    }
+    .gift-box p {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .gift-list {
+      list-style: none;
+      text-align: left;
+      max-width: 380px;
+      margin: 0 auto 1.8rem;
+    }
+    .gift-list li {
+      padding: 0.45rem 0;
+      font-size: 0.9rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .gift-list li::before {
+      content: '⚔';
+      color: var(--accent2);
+      font-size: 0.85rem;
+    }
+
+    .quote-block {
+      text-align: center;
+      padding: 6rem 1.5rem;
+      position: relative;
+    }
+    .quote-bg-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Cinzel', serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      color: rgba(139,26,26,0.07);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .quote-text {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.4rem, 3.5vw, 2rem);
+      max-width: 620px;
+      margin: 0 auto 1rem;
+      line-height: 1.4;
+    }
+    .quote-text mark {
+      background: transparent;
+      color: var(--gold);
+    }
+    .quote-attr {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 5rem 1.5rem 6rem;
+    }
+    .cta-section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      margin-bottom: 0.8rem;
+    }
+    .cta-section p {
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    #lightbox {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.92);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden;
+      transition: all 0.3s;
+    }
+    #lightbox.open { opacity: 1; visibility: visible; }
+    #lightbox img {
+      max-width: 90%; max-height: 85vh;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    #lightbox-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: none; border: none;
+      color: #fff; font-size: 2rem; cursor: pointer;
+    }
+
+    .rv {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .rv.visible { opacity: 1; transform: translateY(0); }
+    .rv.d1 { transition-delay: 0.1s; }
+    .rv.d2 { transition-delay: 0.2s; }
+
+    @media (max-width: 700px) {
+      nav { padding: 1rem 1.2rem; }
+      .nav-r a:not(.nav-book) { display: none; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="dragon-canvas"></canvas>
+  <div id="scroll-progress"></div>
+
+  <div id="loader">
+    <div class="loader-orb"></div>
+    <div class="loader-logo">Iron Throne</div>
+    <div class="loader-tagline">PS5 Controller Stand</div>
+    <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
+    <div class="loader-pct" id="loader-pct">0%</div>
+  </div>
+
+  <nav id="nav">
+    <a href="#" class="logo">⚔ Iron Throne</a>
+    <div class="nav-r">
+      <a href="#steps">Steps</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#tips">Tips</a>
+      <a href="#gift">Gift</a>
+      <a href="#cta" class="nav-book">Get Model</a>
+    </div>
+  </nav>
+
+  <a href="#cta" class="float-cta" id="float-cta">Buy Model →</a>
+
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-tag rv">3D Print · PS5 DualSense Stand</div>
+      <h1 class="hero-title rv d1">Claim the<br><em>Iron Throne</em></h1>
+      <p class="hero-sub rv d2">A Game of Thrones inspired controller stand forged from intertwined swords. Seat your DualSense in the most iconic throne in Westeros.</p>
+      
+      <!-- Main product photo -->
+      <div class="rv d1" style="margin: 2rem auto 1.5rem; max-width: 480px;">
+        <img src="images/ps5-black-1.webp" alt="Iron Throne PS5 Controller Stand" 
+             style="width:100%; border-radius:16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(201,168,76,0.25);">
+      </div>
+
+      <div class="h-cta-row rv d2">
+        <a class="btn-fill" href="#cta">Get the Files</a>
+        <a class="btn-ghost" href="#steps">View Assembly</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="steps">
+    <div class="section-inner">
+      <div class="tag-line rv">Print &amp; Assembly</div>
+      <h2 class="big-serif rv d1">From filament<br><em>to power</em></h2>
+      <div class="steps-grid">
+        <div class="step-card rv" data-img="images/throne-empty.webp">
+          <img src="images/throne-empty.webp" alt="Empty Iron Throne">
+          <div class="step-body">
+            <div class="step-num">STEP 01</div>
+            <h3>Prepare the Print</h3>
+            <p>Load black or dark grey PLA. Orient the throne upright as provided in the files.</p>
+          </div>
+        </div>
+        <div class="step-card rv d1" data-img="images/throne-empty-silver.webp">
+          <img src="images/throne-empty-silver.webp" alt="Silver throne details">
+          <div class="step-body">
+            <div class="step-num">STEP 02</div>
+            <h3>Add Supports</h3>
+            <p>Enable tree supports. The intertwined swords need careful support under the blades and seat.</p>
+          </div>
+        </div>
+        <div class="step-card rv d2" data-img="images/ps5-black-1.webp">
+          <img src="images/ps5-black-1.webp" alt="Black PS5 on throne">
+          <div class="step-body">
+            <div class="step-num">STEP 03</div>
+            <h3>Print the Throne</h3>
+            <p>0.2 mm layers, 15–20% infill, 3–4 walls. Expect 12–18 hours depending on your printer.</p>
+          </div>
+        </div>
+        <div class="step-card rv" data-img="images/ps5-silver.webp">
+          <img src="images/ps5-silver.webp" alt="Silver finish throne">
+          <div class="step-body">
+            <div class="step-num">STEP 04</div>
+            <h3>Remove Supports</h3>
+            <p>Carefully break away tree supports. Light sanding removes any remaining marks on the blades.</p>
+          </div>
+        </div>
+        <div class="step-card rv d1" data-img="images/ps5-custom.webp">
+          <img src="images/ps5-custom.webp" alt="Custom skin DualSense">
+          <div class="step-body">
+            <div class="step-num">STEP 05</div>
+            <h3>Optional Paint</h3>
+            <p>Dry-brush the swords with silver or metallic paint for a battle-worn iron look.</p>
+          </div>
+        </div>
+        <div class="step-card rv d2" data-img="images/ps5-white-black.webp">
+          <img src="images/ps5-white-black.webp" alt="DualSense seated">
+          <div class="step-body">
+            <div class="step-num">STEP 06</div>
+            <h3>Seat the Controller</h3>
+            <p>Place your DualSense into the throne. It sits securely and looks ready to rule the Seven Kingdoms.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="carousel-section" id="gallery">
+    <div class="section-inner">
+      <div class="tag-line rv">Photo Gallery</div>
+      <h2 class="big-serif rv d1">See the throne<br><em>from every angle</em></h2>
+      <div id="carousel-wrap">
+        <div id="drag-container">
+          <div id="spin-container">
+            <img src="images/ps5-black-1.webp" alt="Black DualSense">
+            <img src="images/dragon-full.webp" alt="Dragon on Throne">
+            <img src="images/ps5-purple.webp" alt="Purple DualSense">
+            <img src="images/dragon-side.webp" alt="Dragon side">
+            <img src="images/ps5-silver.webp" alt="Silver finish">
+            <img src="images/xbox-blue.webp" alt="Xbox controller">
+            <img src="images/dragon-front.webp" alt="Dragon close-up">
+            <img src="images/throne-empty.webp" alt="Empty throne">
+            <img src="images/ps5-side.webp" alt="Side view">
+            <img src="images/xbox-dark.webp" alt="Dark Xbox">
+          </div>
+          <div id="ground"></div>
+        </div>
+      </div>
+      <p class="carousel-hint rv">Drag to spin · Scroll to zoom · Auto-rotates</p>
+    </div>
+  </section>
+
+  <section class="tips-section" id="tips">
+    <div class="section-inner">
+      <div class="tag-line rv">Print Settings &amp; Tips</div>
+      <h2 class="big-serif rv d1">Forge a<br><em>clean result</em></h2>
+      <div class="tips-grid">
+        <div class="tip-card rv">
+          <h3>Material</h3>
+          <p>Black or dark grey PLA looks most authentic. PETG works too if you want extra durability. Silk or metallic filament adds extra sword shine.</p>
+        </div>
+        <div class="tip-card rv d1">
+          <h3>Supports</h3>
+          <p>Tree supports are strongly recommended. They are easier to remove from the thin sword blades without damaging the model.</p>
+        </div>
+        <div class="tip-card rv d2">
+          <h3>Infill &amp; Walls</h3>
+          <p>15–20% infill and 3–4 walls give a solid, stable base that won’t tip when the controller is seated.</p>
+        </div>
+        <div class="tip-card rv">
+          <h3>Post-processing</h3>
+          <p>Light sanding + optional silver dry-brush turns the plastic into convincing iron. A matte clear coat helps protect the finish.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gift-section" id="gift">
+    <div class="section-inner">
+      <div class="tag-line rv">Special Offer</div>
+      <h2 class="big-serif rv d1">A gift for<br><em>true fans</em></h2>
+      <div class="gift-box rv d1">
+        <div class="gift-icon">🐉</div>
+        <h3>Free Dragon Bonus</h3>
+        <p>When you purchase the Iron Throne stand, you also receive this highly detailed dragon that sits on the throne:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin:1.2rem 0 1.5rem;">
+          <img src="images/dragon-full.webp" alt="Dragon on Throne" style="width:100%;height:130px;object-fit:cover;border-radius:8px;">
+          <img src="images/dragon-side.webp" alt="Dragon side" style="width:100%;height:130px;object-fit:cover;border-radius:8px;">
+          <img src="images/dragon-front.webp" alt="Dragon front" style="width:100%;height:130px;object-fit:cover;border-radius:8px;">
+          <img src="images/dragon-back.webp" alt="Dragon back" style="width:100%;height:130px;object-fit:cover;border-radius:8px;">
+        </div>
+        <ul class="gift-list">
+          <li>Highly detailed Dragon STL (print &amp; display)</li>
+          <li>Full Iron Throne STL for DualSense / Xbox</li>
+          <li>Recommended print settings included</li>
+          <li>Epic desk centerpiece for GOT fans</li>
+          <li>Commercial use for personal gifts allowed</li>
+        </ul>
+        <a class="btn-fill" href="#cta">Claim Your Gift →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote-block">
+    <div class="quote-bg-text">Throne</div>
+    <blockquote class="quote-text rv">
+      When you play the game of thrones, <mark>you win or you die</mark>. There is no middle ground — only a DualSense on the Iron Throne.
+    </blockquote>
+    <p class="quote-attr rv d1">— Inspired by Game of Thrones</p>
+  </section>
+
+  <section class="cta-section" id="cta">
+    <h2 class="rv">Ready to rule?</h2>
+    <p class="rv d1">Download the files, print the throne, and give your DualSense the seat it deserves.</p>
+    <div class="h-cta-row rv d2" style="justify-content:center;margin-top:0.5rem;">
+      <a class="btn-fill" href="https://cults3d.com/en/3d-model/game/game-of-thrones-iron-throne-controller-stand-for-ps5-free-gift" target="_blank" rel="noopener">Buy &amp; Download</a>
+      <a class="btn-ghost" href="https://cults3d.com/en/3d-model/game/game-of-thrones-iron-throne-controller-stand-for-ps5-free-gift" target="_blank" rel="noopener">View on Cults3D</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Iron Throne · PS5 Controller Stand</span>
+    <a href="https://cults3d.com/en/3d-model/game/game-of-thrones-iron-throne-controller-stand-for-ps5-free-gift" target="_blank" rel="noopener">View on Cults3D →</a>
+  </footer>
+
+  <div id="lightbox">
+    <button id="lightbox-close" aria-label="Close">×</button>
+    <img src="" alt="Enlarged step">
+  </div>
+
+  <script>
+    // ===== DRAGON CANVAS (adapted) =====
+    (function() {
+      var a = document.getElementById('dragon-canvas');
+      var c = a.getContext('2d');
+      var sw, sh, M = Math, Mc = M.cos, Ms = M.sin, ran = M.random;
+      var pfloat = 0, pi = M.PI, dragons = [], shape = [];
+
+      function resize() {
+        sw = a.width = window.innerWidth;
+        sh = a.height = window.innerHeight;
+        a.style.width = sw + 'px';
+        a.style.height = sh + 'px';
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      var loop = function() {
+        a.width = sw;
+        c.fillStyle = 'rgba(139, 26, 26, 0.55)';
+        for (var j = 0; j < 6; j++) {
+          if (!dragons[j]) dragons[j] = dragon(j);
+          dragons[j]();
+        }
+        pfloat++;
+        requestAnimationFrame(loop);
+      };
+
+      var dragon = function(index) {
+        var scale = 0.07 + index * index / 70,
+            gx = ran() * sw / scale,
+            gy = sh / scale,
+            lim = 300,
+            speed = 2.2 + ran() * 3.5,
+            direction = pi,
+            direction1 = direction,
+            spine = [];
+
+        return function() {
+          if (gx < -lim || gx > sw / scale + lim || gy < -lim || gy > sh / scale + lim) {
+            var dx = sw / scale / 2 - gx,
+                dy = sh / scale / 2 - gy;
+            direction = direction1 = M.atan(dx / dy) + (dy < 0 ? pi : 0);
+          } else {
+            direction1 += ran() * 0.1 - 0.05;
+            direction -= (direction - direction1) * 0.1;
+          }
+          gx += Ms(direction) * speed;
+          gy += Mc(direction) * speed;
+
+          for (var i = 0; i < 70; i++) {
+            if (i) {
+              if (!pfloat) spine[i] = { x: gx, y: gy };
+              var p = spine[i - 1],
+                  dx = spine[i].x - p.x,
+                  dy = spine[i].y - p.y,
+                  d = M.sqrt(dx * dx + dy * dy),
+                  perpendicular = M.atan(dy / dx) + pi / 2 + (dx < 0 ? pi : 0);
+              var mod = d > 4 ? 0.5 : (d > 2 ? (d - 2) / 4 : 0);
+              spine[i].x -= dx * mod;
+              spine[i].y -= dy * mod;
+              spine[i].px = Mc(perpendicular);
+              spine[i].py = Ms(perpendicular);
+              if (i == 20) var wingPerpendicular = perpendicular;
+            } else {
+              spine[i] = { x: gx, y: gy, px: 0, py: 0 };
+            }
+          }
+
+          c.beginPath();
+          c.moveTo(spine[0].x * scale, spine[0].y * scale);
+          for (var i = 0; i < 154; i += 2) {
+            var index, L;
+            if (i < 77) { index = i; L = 1; }
+            else { index = 152 - i; L = -1; }
+            var x = shape[index];
+            var spineNode = spine[shape[index + 1]];
+            if (index >= 56) {
+              var wobbleIndex = 56 - index;
+              var wobble = Ms(wobbleIndex / 3 + pfloat * 0.1) * wobbleIndex * L;
+              x = 20 - index / 4 + wobble;
+              spineNode = spine[index * 2 - 83];
+            } else if (index > 13) {
+              x = 4 + (x - 4) * (Ms((-x / 2 + pfloat) / 25 * speed / 4) + 2) * 2;
+              if (spineNode) {
+                spineNode.px = Mc(wingPerpendicular);
+                spineNode.py = Ms(wingPerpendicular);
+              }
+            }
+            if (spineNode) {
+              c.lineTo(
+                (spineNode.x + x * L * spineNode.px) * scale,
+                (spineNode.y + x * L * spineNode.py) * scale
+              );
+            }
+          }
+          c.fill();
+        };
+      };
+
+      '! ((&(&*$($,&.)/-.0,4%3"7$;(@/EAA<?:<9;;88573729/7,6(8&;'.split('').map(function(a, i) {
+        shape[i] = a.charCodeAt(0) - 32;
+      });
+
+      loop();
+    })();
+
+    // Loader
+    const bar = document.getElementById('loader-bar');
+    const pctEl = document.getElementById('loader-pct');
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 18 + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        setTimeout(() => document.getElementById('loader').classList.add('hide'), 400);
+      }
+      bar.style.width = progress + '%';
+      pctEl.textContent = Math.floor(progress) + '%';
+    }, 180);
+
+    // Scroll progress + nav + float CTA
+    const progressBar = document.getElementById('scroll-progress');
+    const floatCta = document.getElementById('float-cta');
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      const p = docH > 0 ? (scrollY / docH) * 100 : 0;
+      progressBar.style.width = p + '%';
+      document.getElementById('nav').classList.toggle('scrolled', scrollY > 60);
+      floatCta.classList.toggle('show', scrollY > 450);
+    });
+
+    // Reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.rv').forEach(el => observer.observe(el));
+
+    // Lightbox
+    const lb = document.getElementById('lightbox');
+    const lbImg = lb.querySelector('img');
+    document.querySelectorAll('.step-card').forEach(card => {
+      card.addEventListener('click', () => {
+        lbImg.src = card.dataset.img;
+        lb.classList.add('open');
+      });
+    });
+    document.getElementById('lightbox-close').onclick = () => lb.classList.remove('open');
+    lb.addEventListener('click', (e) => { if (e.target === lb) lb.classList.remove('open'); });
+
+    // ===== 3D CAROUSEL =====
+    var radius = 230;
+    var autoRotate = true;
+    var rotateSpeed = -55;
+    var imgWidth = 135;
+    var imgHeight = 175;
+
+    setTimeout(initCarousel, 100);
+
+    var odrag = document.getElementById('drag-container');
+    var ospin = document.getElementById('spin-container');
+    var aImg = ospin.getElementsByTagName('img');
+    var aEle = [...aImg];
+
+    ospin.style.width = imgWidth + 'px';
+    ospin.style.height = imgHeight + 'px';
+
+    var ground = document.getElementById('ground');
+    ground.style.width = radius * 3 + 'px';
+    ground.style.height = radius * 3 + 'px';
+
+    function initCarousel(delayTime) {
+      for (var i = 0; i < aEle.length; i++) {
+        aEle[i].style.transform = 'rotateY(' + (i * (360 / aEle.length)) + 'deg) translateZ(' + radius + 'px)';
+        aEle[i].style.transition = 'transform 1s';
+        aEle[i].style.transitionDelay = delayTime || (aEle.length - i) / 4 + 's';
+      }
+    }
+
+    function applyTransform(obj) {
+      if (tY > 180) tY = 180;
+      if (tY < 0) tY = 0;
+      obj.style.transform = 'rotateX(' + (-tY) + 'deg) rotateY(' + tX + 'deg)';
+    }
+
+    function playSpin(yes) {
+      ospin.style.animationPlayState = yes ? 'running' : 'paused';
+    }
+
+    var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
+
+    if (autoRotate) {
+      var animationName = rotateSpeed > 0 ? 'spin' : 'spinRevert';
+      ospin.style.animation = animationName + ' ' + Math.abs(rotateSpeed) + 's infinite linear';
+    }
+
+    var styleSheet = document.createElement('style');
+    styleSheet.textContent = '@keyframes spin{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}@keyframes spinRevert{from{transform:rotateY(360deg)}to{transform:rotateY(0deg)}}';
+    document.head.appendChild(styleSheet);
+
+    document.getElementById('carousel-wrap').onpointerdown = function (e) {
+      clearInterval(odrag.timer);
+      e = e || window.event;
+      sX = e.clientX;
+      sY = e.clientY;
+      this.onpointermove = function (e) {
+        e = e || window.event;
+        nX = e.clientX;
+        nY = e.clientY;
+        desX = nX - sX;
+        desY = nY - sY;
+        tX += desX * 0.1;
+        tY += desY * 0.1;
+        applyTransform(odrag);
+        sX = nX;
+        sY = nY;
+      };
+      this.onpointerup = function () {
+        this.onpointermove = this.onpointerup = null;
+        odrag.timer = setInterval(function () {
+          desX *= 0.95;
+          desY *= 0.95;
+          tX += desX * 0.1;
+          tY += desY * 0.1;
+          applyTransform(odrag);
+          playSpin(false);
+          if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
+            clearInterval(odrag.timer);
+            playSpin(true);
+          }
+        }, 17);
+      };
+      return false;
+    };
+
+    document.getElementById('carousel-wrap').onmousewheel = function (e) {
+      e = e || window.event;
+      var d = e.wheelDelta / 20 || -e.detail;
+      radius += d;
+      if (radius < 120) radius = 120;
+      if (radius > 400) radius = 400;
+      initCarousel(1);
+    };
+  </script>
+</body>
+</html>
